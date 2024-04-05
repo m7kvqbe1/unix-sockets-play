@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"io"
 	"net"
 	"os"
 
@@ -36,16 +37,25 @@ func handleServerConnection(conn net.Conn) {
 	defer conn.Close()
 
 	buf := make([]byte, 1024)
+	var data []byte
 
-	n, err := conn.Read(buf)
-	if err != nil {
-		fmt.Println("Server read error:", err)
-		return
+	for {
+		n, err := conn.Read(buf)
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+
+			fmt.Println("Server read error:", err)
+			return
+		}
+
+		data = append(data, buf[:n]...)
 	}
 
 	var msg pb.SimpleMessage
 
-	if err := proto.Unmarshal(buf[:n], &msg); err != nil {
+	if err := proto.Unmarshal(data, &msg); err != nil {
 		fmt.Println("Server protobuf decode error:", err)
 		return
 	}
