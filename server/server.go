@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"net"
 	"os"
+
+	"github.com/m7kvqbe1/unix-sockets-play/pb"
+	"google.golang.org/protobuf/proto"
 )
 
-func Start(socketPath string) {
+func StartUnixSocketServer(socketPath string) {
 	os.Remove(socketPath)
 
 	listener, err := net.Listen("unix", socketPath)
@@ -21,18 +24,31 @@ func Start(socketPath string) {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			fmt.Println("Error accepting connection:", err)
+			fmt.Println("Error accepting:", err.Error())
 			continue
 		}
 
-		go handleConnection(conn)
+		go handleServerConnection(conn)
 	}
 }
 
-func handleConnection(conn net.Conn) {
+func handleServerConnection(conn net.Conn) {
 	defer conn.Close()
 
-	fmt.Println("Accepted new connection.")
+	buf := make([]byte, 1024)
 
-	conn.Write([]byte("Hello from server!"))
+	n, err := conn.Read(buf)
+	if err != nil {
+		fmt.Println("Server read error:", err)
+		return
+	}
+
+	var msg pb.SimpleMessage
+
+	if err := proto.Unmarshal(buf[:n], &msg); err != nil {
+		fmt.Println("Server protobuf decode error:", err)
+		return
+	}
+
+	fmt.Printf("Server received: %s\n", msg.Content)
 }

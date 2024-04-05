@@ -10,9 +10,9 @@ import (
 func main() {
 	socketPath := "/tmp/example.sock"
 
-	go server.Start(socketPath)
+	go server.StartUnixSocketServer(socketPath)
 
 	time.Sleep(1 * time.Second)
 
-	client.Connect(socketPath)
+	client.StartUnixSocketClient(socketPath)
 }

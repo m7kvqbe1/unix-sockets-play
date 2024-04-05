@@ -3,9 +3,12 @@ package client
 import (
 	"fmt"
 	"net"
+
+	"github.com/m7kvqbe1/unix-sockets-play/pb"
+	"google.golang.org/protobuf/proto"
 )
 
-func Connect(socketPath string) {
+func StartUnixSocketClient(socketPath string) {
 	conn, err := net.Dial("unix", socketPath)
 	if err != nil {
 		panic(err)
@@ -13,15 +16,16 @@ func Connect(socketPath string) {
 
 	defer conn.Close()
 
-	fmt.Println("Connected to server.")
+	msg := &pb.SimpleMessage{Content: "Hello from client"}
 
-	buffer := make([]byte, 1024)
-
-	n, err := conn.Read(buffer)
+	data, err := proto.Marshal(msg)
 	if err != nil {
-		fmt.Println("Error reading:", err)
+		fmt.Println("Client protobuf encode error:", err)
 		return
 	}
 
-	fmt.Println("Received:", string(buffer[:n]))
+	if _, err = conn.Write(data); err != nil {
+		fmt.Println("Client write error:", err)
+		return
+	}
 }

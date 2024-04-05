@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package main;
+
+option go_package = "./pb";
+
+message SimpleMessage {
+  string content = 1;
+}
