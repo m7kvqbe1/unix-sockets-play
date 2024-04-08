@@ -1,8 +1,8 @@
 package server
 
 import (
-	"fmt"
 	"io"
+	"log"
 	"net"
 	"os"
 
@@ -15,17 +15,17 @@ func StartUnixSocketServer(socketPath string) {
 
 	listener, err := net.Listen("unix", socketPath)
 	if err != nil {
-		panic(err)
+		log.Fatalf("Error listening: %v\n", err)
 	}
 
 	defer listener.Close()
 
-	fmt.Println("Server listening on", socketPath)
+	log.Println("Server listening on", socketPath)
 
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			fmt.Println("Error accepting:", err.Error())
+			log.Println("Error accepting:", err.Error())
 			continue
 		}
 
@@ -46,7 +46,7 @@ func handleServerConnection(conn net.Conn) {
 				break
 			}
 
-			fmt.Println("Server read error:", err)
+			log.Println("Server read error:", err)
 			return
 		}
 
@@ -56,9 +56,9 @@ func handleServerConnection(conn net.Conn) {
 	var msg pb.SimpleMessage
 
 	if err := proto.Unmarshal(data, &msg); err != nil {
-		fmt.Println("Server protobuf decode error:", err)
+		log.Println("Server protobuf decode error:", err)
 		return
 	}
 
-	fmt.Printf("Server received: %s\n", msg.Content)
+	log.Printf("Server received: %s\n", msg.Content)
 }

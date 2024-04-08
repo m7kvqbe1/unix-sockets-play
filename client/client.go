@@ -1,7 +1,7 @@
 package client
 
 import (
-	"fmt"
+	"log"
 	"net"
 
 	"github.com/m7kvqbe1/unix-sockets-play/pb"
@@ -11,7 +11,7 @@ import (
 func StartUnixSocketClient(socketPath string) {
 	conn, err := net.Dial("unix", socketPath)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v\n", err)
 	}
 
 	defer conn.Close()
@@ -20,12 +20,12 @@ func StartUnixSocketClient(socketPath string) {
 
 	data, err := proto.Marshal(msg)
 	if err != nil {
-		fmt.Println("Client protobuf encode error:", err)
+		log.Println("Client protobuf encode error:", err)
 		return
 	}
 
 	if _, err = conn.Write(data); err != nil {
-		fmt.Println("Client write error:", err)
+		log.Println("Client write error:", err)
 		return
 	}
 }

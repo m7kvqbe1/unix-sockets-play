@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,6 +14,10 @@ import (
 
 func main() {
 	socketPath := "/tmp/example.sock"
+
+	if _, err := os.Stat(socketPath); errors.Is(err, os.ErrNotExist) {
+		log.Fatalf("Access to Socket %s denied\n", socketPath)
+	}
 
 	go server.StartUnixSocketServer(socketPath)
 
